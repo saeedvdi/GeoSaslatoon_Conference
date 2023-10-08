@@ -1,0 +1,1027 @@
+[Mesh]
+  [./file_mesh]
+    type = FileMeshGenerator
+    file = Mesh/2FracFault_tet_45_3000m_high_density_mesh.e
+  [../]
+[]
+
+[BCs]
+  [./p_top]
+    type = FunctionDirichletBC
+    variable = pore_pressure
+    boundary = '1'
+    function = pressure_fc
+  [../]
+  [./t_top]
+    type = FunctionDirichletBC
+    variable = pore_pressure
+    boundary = '1'
+    function = temperature_fc
+  [../]
+  [./T_bottom]
+    type = GolemHeatFlowBC
+    variable = temperature
+    boundary = '2'
+    value = 0.054
+  [../]
+  [./p_sides]
+    type = GolemVelocityBC
+    variable = pore_pressure
+    boundary = '3 4 5 6'
+    velocity = 0.0
+  [../]
+
+  [./temp_inj]
+    type = DirichletBC
+    variable = temperature
+    boundary = 10
+    value = 60
+    preset = true
+  [../]
+
+  [./confine_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = '5 6'
+    value = 0
+    preset = true
+  [../]
+  [./confine_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = '3 4'
+    value = 0
+    preset = true
+  [../]
+  [./confine_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = '1 2'
+    value = 0
+    preset = true
+  [../]
+[]
+
+[Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./pore_pressure]
+    order = FIRST
+    family = LAGRANGE
+  #  initial_condition = 43
+    [./InitialCondition]
+       type = FunctionIC
+       function = pressure_fc
+    [../]
+  [../]
+  [./temperature]
+      order = FIRST
+      family = LAGRANGE
+  #    initial_condition = 88
+    [./InitialCondition]
+      type = FunctionIC
+      function = temperature_fc
+    [../]
+  [../]
+[]
+
+[Kernels]
+  #Temperature
+    [./KernelTTime]
+      type = GolemKernelTimeT
+      variable = temperature
+    [../]
+    [./KernelT]
+      type = GolemKernelT
+      variable = temperature
+    [../]
+    [./KernelTH]
+      type = GolemKernelTH
+      variable = temperature
+    [../]
+
+  #Pore Pressure
+    [./p_time]
+      type = GolemKernelTimeH
+      variable = pore_pressure
+    [../]
+    [./HKernel]
+      type = GolemKernelH
+      variable = pore_pressure
+    [../]
+    [./HMKernel_poroelastic]
+      type = GolemKernelHPoroElastic
+      variable = pore_pressure
+      block = '1'
+    [../]
+
+  #Displacement
+    [./MKernel_x]
+      type = GolemKernelM
+      variable = disp_x
+      component = 0
+      block = '1'
+    [../]
+    [./MKernel_y]
+      type = GolemKernelM
+      variable = disp_y
+      component = 1
+      block = '1'
+    [../]
+      [./MKernel_z]
+      type = GolemKernelM
+      variable = disp_z
+      component = 2
+      block = '1'
+    [../]
+[]
+
+[AuxVariables]
+  ## Stress ##
+    [./stress_xx]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./stress_yy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./stress_zz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Shear Stress ##
+    [./stress_xy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./stress_xz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./stress_yz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## thermal_stress ##
+    [./thermal_stress_xx]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./thermal_stress_yy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./thermal_stress_zz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## VonMisesStress ##
+    [./VonMisesStress]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Strain ##
+    [./strain_xx]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./strain_yy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./strain_zz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Shear Strain ##
+    [./strain_xy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./strain_xz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./strain_yz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Hydraulic ##
+    [./vf_x]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./vf_y]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./vf_z]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+
+  ## Exchange ##
+    [./porosity]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./fluid_density]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./fluid_viscosity]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./permeability]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+
+  ## Effctive Parameters ##
+
+    [./EP]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./ES_xx]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./ES_yy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./ES_zz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Plastic Parameters ##
+    [./plastic_strain_xx]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./plastic_strain_yy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./plastic_strain_zz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./plastic_strain_xy]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./plastic_strain_xz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [./plastic_strain_yz]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+    [plastic_strain_eqv]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    []
+    [plastic_strain_rate_eqv]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    []
+
+    [./yield]
+      order = CONSTANT
+      family = MONOMIAL
+      block = '1'
+    [../]
+
+  ## Slip Analysis ##
+    [./normal_stress]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./shear_stress]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+    [./slip_tendency]
+      order = CONSTANT
+      family = MONOMIAL
+    [../]
+[]
+
+[AuxKernels]
+  ## Stress ##
+    [./stress_xx]
+      type = GolemStress
+      variable = stress_xx
+      index_i = 0
+      index_j = 0
+    [../]
+    [./stress_yy]
+      type = GolemStress
+      variable = stress_yy
+      index_i = 1
+      index_j = 1
+    [../]
+    [./stress_zz]
+      type = GolemStress
+      variable = stress_zz
+      index_i = 2
+      index_j = 2
+    [../]
+  ## Shear Stress ##
+    [./stress_xy]
+      type = GolemStress
+      variable = stress_xy
+      index_i = 0
+      index_j = 1
+    [../]
+    [./stress_xz]
+      type = GolemStress
+      variable = stress_xz
+      index_i = 0
+      index_j = 2
+    [../]
+    [./stress_yz]
+      type = GolemStress
+      variable = stress_yz
+      index_i = 1
+      index_j = 2
+    [../]
+  ## Thermal_stress ##
+    [./thermal_stress_xx]
+      type = GolemStress
+      variable = thermal_stress_xx
+      index_i = 0
+      index_j = 0
+    [../]
+    [./thermal_stress_yy]
+      type = GolemStress
+      variable = thermal_stress_yy
+      index_i = 1
+      index_j = 1
+    [../]
+    [./thermal_stress_zz]
+      type = GolemStress
+      variable = thermal_stress_zz
+      index_i = 2
+      index_j = 2
+    [../]
+    [./VonMisesStress]
+      type = GolemVonMisesStress
+      variable = VonMisesStress
+    [../]
+
+  ## Strain ##
+    [./strain_xx]
+      type = GolemStrain
+      variable = strain_xx
+      index_i = 0
+      index_j = 0
+    [../]
+    [./strain_yy]
+      type = GolemStrain
+      variable = strain_yy
+      index_i = 1
+      index_j = 1
+    [../]
+    [./strain_zz]
+      type = GolemStrain
+      variable = strain_zz
+      index_i = 2
+      index_j = 2
+    [../]
+
+  ## Shear Strain ##
+    [./strain_xy]
+      type = GolemStrain
+      variable = strain_xy
+      index_i = 0
+      index_j = 1
+    [../]
+    [./strain_xz]
+      type = GolemStrain
+      variable = strain_xz
+      index_i = 0
+      index_j = 2
+    [../]
+    [./strain_yz]
+      type = GolemStrain
+      variable = strain_yz
+      index_i = 1
+      index_j = 2
+    [../]
+
+  ## Hydraulic ##
+    [./vf_x]
+      type = GolemFluidVelocity
+      variable = vf_x
+      component = 0
+    [../]
+    [./vf_y]
+      type = GolemFluidVelocity
+      variable = vf_y
+      component = 1
+    [../]
+    [./vf_z]
+      type = GolemFluidVelocity
+      variable = vf_z
+      component = 2
+    [../]
+
+  ## Exchagne ##
+    [./porosity]
+      type = MaterialRealAux
+      variable = porosity
+      property = porosity
+    [../]
+    [./fluid_density]
+      type = MaterialRealAux
+      variable = fluid_density
+      property = fluid_density
+    [../]
+    [./fluid_viscosity]
+      type = MaterialRealAux
+      variable = fluid_viscosity
+      property = fluid_viscosity
+    [../]
+    [./permeability]
+      type = MaterialStdVectorAux
+      variable = permeability
+      property = permeability
+      index = 0
+    [../]
+
+  ## Effctive Parameters ##
+    [./EP]
+      type = GolemEffectivePressure
+      variable = EP
+    [../]
+    [./ES_xx] #Effective Stress
+      type = ParsedAux
+      coupled_variables = 'stress_xx pore_pressure'
+      execute_on = timestep_end
+      variable = ES_xx
+      expression = 'stress_xx-0.8066*pore_pressure'
+    [../]
+    [./ES_yy]
+      type = ParsedAux
+      coupled_variables = 'stress_yy pore_pressure'
+      execute_on = timestep_end
+      variable = ES_yy
+      expression = 'stress_yy-0.8066*pore_pressure'
+    [../]
+    [./ES_zz]
+      type = ParsedAux
+      coupled_variables = 'stress_zz pore_pressure'
+      execute_on = timestep_end
+      variable = ES_zz
+      expression = 'stress_zz-0.8066*pore_pressure'
+    [../]
+
+
+    [./yield]
+      type = MaterialRealAux
+      variable = yield
+      property = plastic_yield_function
+    [../]
+    [./plastic_strain_xx]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_xx
+      index_i = 0
+      index_j = 0
+    [../]
+    [./plastic_strain_yy]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_yy
+      index_i = 1
+      index_j = 1
+    [../]
+    [./plastic_strain_zz]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_zz
+      index_i = 2
+      index_j = 2
+    [../]
+
+    [./plastic_strain_xy]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_zz
+      index_i = 0
+      index_j = 1
+    []
+
+    [./plastic_strain_xz]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_zz
+      index_i = 0
+      index_j = 2
+    [../]
+    [./plastic_strain_yz]
+      type = GolemStrain
+      strain_type = plastic
+      variable = plastic_strain_zz
+      index_i = 1
+      index_j = 2
+    [../]
+    [./plastic_strain_eqv]
+      type = GolemEqvInelasticStrain
+      variable = plastic_strain_eqv
+    [../]
+    [./plastic_strain_rate_eqv]
+      type = GolemEqvInelasticStrainRate
+      variable = plastic_strain_rate_eqv
+    [../]
+
+  ## Slip Tednensy Analysis ##
+    [./normal_stress]
+      type = GolemFaultNormalStress
+      variable = normal_stress
+      boundary = '9'
+      check_boundary_restricted = false
+    [../]
+    [./shear_stress]
+      type = GolemFaultShearStress
+      variable = shear_stress
+      boundary = '9'
+      check_boundary_restricted = false
+    [../]
+    [./slip_tendency]
+      type = GolemFaultSlipTendency
+      variable = slip_tendency
+      boundary = '9'
+      check_boundary_restricted = false
+    [../]
+[]
+
+[DiracKernels]
+  [./HInjection]
+    type = GolemDiracKernelTH
+    variable = pore_pressure
+    source_point = '-200 0 -4000'
+    source_type = injection
+    in_out_rate = 15.0 # L/s
+    start_time = 0.0
+    end_time = 720
+  [../]
+  [./HProduction]
+    type = GolemDiracKernelTH
+    variable = pore_pressure
+    source_point = '200 0 -4000'
+    source_type = extraction
+    in_out_rate = 15.0 # L/s
+    start_time = 0.0
+    end_time = 720
+  [../]
+[]
+
+[Functions]
+  [./pressure_fc]
+    type = ParsedFunction
+    expression = rho*g*z+p
+    symbol_names = 'rho g p'
+    symbol_values = '1148e-06 -9.8065 0.0'
+  [../]
+  [./temperature_fc]
+    type = ParsedFunction
+    expression = grad*z+temp
+    symbol_names = 'grad temp'
+    symbol_values = '-0.0209 0.0' #R2019_report_temperature_gradient_Section6.2.2_PG:61
+  [../]
+  [./Se_xx]
+    type = ConstantFunction
+    value = -71.2302 # 106 MPa
+  [../]
+  [./Se_yy]
+    type = ConstantFunction
+    value = -146.2302 # 181 MPa
+  [../]
+  [./Se_zz]
+    type = ConstantFunction
+    value = -73.2302 # 108 MPa
+  [../]
+  [./time_step_fct]
+    type = PiecewiseConstant
+    x = '0 10 30 50 100'
+    y = '1 2  5  10 20'
+  [../]
+  [./time_step]
+    type = ParsedFunction
+    expression = 'if(t<=0.01,0.001,if(t>0.01&t<=0.1,0.01,if(t>0.1&t<=1,0.1,if(t<1&t<=10,1,if(t>10&t<=500,50,100)))))'
+  [../]
+[]
+
+[Materials]
+  [./rock_HM]
+    type = GolemMaterialMInelastic
+    block = 1
+    inelastic_models = 'DP'
+    strain_model = incr_small_strain
+    background_stress = 'Se_xx Se_yy Se_zz'
+    young_modulus = 49.09854e+09 # Pa # Reduced Strength Parameters
+    poisson_ratio = 0.25 # mechanical report
+    bulk_modulus = 44.666e9  #71.5
+    shear_modulus = 41.875e+09
+    solid_bulk_modulus = 230.97e+09 # Pa
+
+    permeability_initial = 1.0e-15 # m^2
+    fluid_viscosity_initial = 1.0e-03 # Pa s
+    fluid_modulus = 1.774e+09 # Pa
+    porosity_initial = 0.06 # In decimal
+
+    solid_thermal_conductivity_initial = 2.6
+    solid_heat_capacity_initial = 898
+  [../]
+  [./DP]
+    type = GolemDruckerPrager
+    MC_cohesion = DP_cohesion
+    MC_friction = DP_friction
+    MC_dilation = DP_dilation
+    yield_function_tol = 1.0e-08
+    # min_step_size = 0.001
+    # max_NR_iterations = 100
+  [../]
+
+  [./frac_H]
+    type = GolemMaterialTH
+    block = '2 3'
+    material_type = frac
+    scaling_factor_initial = 1.0e-02
+
+    permeability_initial = 1e-8
+    fluid_viscosity_initial = 1.0e-03
+    fluid_modulus = 2.5e+09
+    porosity_initial = 1.0
+
+    solid_thermal_conductivity_initial = 0.65
+    solid_heat_capacity_initial = 898
+  [../]
+  [./fault_TH]
+    type = GolemMaterialTH
+    block = '4'
+    material_type = frac
+    scaling_factor_initial = 1.0e-02
+
+    permeability_initial = 1e-12
+    fluid_viscosity_initial = 1.0e-03
+    fluid_modulus = 2.5e+09
+    porosity_initial = 1.0
+
+    solid_thermal_conductivity_initial = 0.65
+    solid_heat_capacity_initial = 898
+  [../]
+[]
+
+[GlobalParams]
+  # Coupling
+    has_lumped_mass_matrix = true
+    displacements = 'disp_x disp_y disp_z'
+    pore_pressure = pore_pressure
+    temperature = temperature
+  # Properties
+  fluid_density_initial = 1080
+  fluid_heat_capacity_initial = 4180
+  fluid_thermal_conductivity_initial = 0.65
+  fluid_thermal_expansion = 9.1e-05
+
+  solid_density_initial = 2672
+  solid_thermal_expansion = 7.5e-06
+
+  scaling_uo = scaling
+  supg_uo = supg
+  porosity_uo = porosity
+  fluid_density_uo = fluid_density
+  fluid_viscosity_uo = fluid_viscosity
+  permeability_uo = permeability
+[]
+
+[UserObjects]
+  [./scaling]
+    type = GolemScaling
+    characteristic_time = 2.592e+06 # approx. 1 month
+    characteristic_length = 1.0
+    characteristic_temperature = 1.0
+    characteristic_stress = 1.0e+06 # 1 MPa
+  [../]
+  [./supg]
+    type = GolemSUPG
+  [../]
+  [./porosity]
+    type = GolemPorosityTHM
+  [../]
+  [./fluid_density]
+    type = GolemFluidDensityConstant
+  [../]
+  [./fluid_viscosity]
+    type = GolemFluidViscosityConstant
+  [../]
+  [./permeability]
+    type = GolemPermeabilityKC
+  [../]
+  [./DP_cohesion]
+    type = GolemHardeningConstant
+    value = 14.381e6
+  [../]
+  [./DP_friction]
+    type = GolemHardeningConstant
+    value = 46.77
+    convert_to_radians = true
+  [../]
+  [./DP_dilation]
+    type = GolemHardeningConstant
+    value = 10.0
+    convert_to_radians = true
+  [../]
+[]
+
+[Postprocessors]
+  ## Pore_Pressure_Inj_production
+    [./PP_inj]
+      type = PointValue
+      variable = pore_pressure
+      point = '-200 0 -4000'
+      outputs = 'source_in_out'
+    [../]
+    [./PP_pro]
+      type = PointValue
+      variable = pore_pressure
+      point = '200 0 -4000'
+      outputs = 'source_in_out'
+    [../]
+
+  ##Temp_Inj_production
+    [./Temp_inj]
+      type = PointValue
+      variable = temperature
+      point = '-200 0 -4000'
+      outputs = 'source_in_out'
+    [../]
+    [./Temp_pro]
+      type = PointValue
+      variable = temperature
+      point = '200 0 -4000'
+      outputs = 'source_in_out'
+    [../]
+[]
+
+[VectorPostprocessors]
+  [./CSV_line_sample_Z_middle]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '0 0 -2500'
+    end_point = '0 0 -5500'
+    num_points = 1000
+    sort_by = z
+    outputs = CSV_line_sample_Z_middle
+  [../]
+
+  [./CSV_line_sample_Z_injection]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '-200 0 -2500'
+    end_point = '-200 0 -5500'
+    num_points = 1000
+    sort_by = z
+    outputs = CSV_line_sample_Z_injection
+  [../]
+
+  [./_CSV_line_sample_Z_produciton]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '200 0 -2500'
+    end_point = '200 0 -5500'
+    num_points = 1000
+    sort_by = z
+    outputs = CSV_line_sample_Z_produciton
+  [../]
+
+  [./CSV_line_sample_X_2000m]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '-1000 0 -4000'
+    end_point = '1000 0 -4000'
+    num_points = 1000
+    sort_by = x
+    outputs = CSV_line_sample_X_2000m
+  [../]
+
+  [./CSV_line_sample_X_8000m]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '-4000 0 -4000'
+    end_point = '4000 0 -4000'
+    num_points = 2000
+    sort_by = x
+    outputs = CSV_line_sample_X_8000m
+  [../]
+
+  [./CSV_line_sample_Y_2000m]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '0 -1000 -4000'
+    end_point = '0 1000 -4000'
+    num_points = 1000
+    sort_by = y
+    outputs = CSV_line_sample_Y_2000m
+  [../]
+
+  [./CSV_line_sample_Y_8000m]
+    type = LineValueSampler
+    variable = 'pore_pressure temperature stress_xx stress_yy stress_zz stress_xy stress_xz stress_yz porosity permeability strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz disp_x disp_y disp_z normal_stress shear_stress slip_tendency thermal_stress_xx thermal_stress_yy thermal_stress_zz VonMisesStress yield plastic_strain_xx plastic_strain_yy plastic_strain_zz plastic_strain_xy plastic_strain_xz plastic_strain_yz plastic_strain_eqv plastic_strain_rate_eqv EP ES_xx ES_yy ES_zz fluid_density fluid_viscosity vf_x vf_y vf_z'
+    start_point = '0 -4000 -4000'
+    end_point = '0 4000 -4000'
+    num_points = 2000
+    sort_by = y
+    outputs = CSV_line_sample_Y_8000m
+  [../]
+[]
+
+[Preconditioning]
+  [./fieldsplit]
+    type = FSP
+    full = true
+    topsplit = 'pTe'
+    [./pTe]
+      splitting = 'p T e'
+      splitting_type = multiplicative
+      petsc_options = '-snes_ksp_ew
+                       -snes_monitor
+                       -snes_linesearch_monitor
+                       -snes_converged_reason'
+      petsc_options_iname = '-ksp_type
+                             -ksp_rtol -ksp_max_it
+                             -snes_type -snes_linesearch_type
+                             -snes_atol -snes-stol -snes_rtol -snes_max_it'
+      petsc_options_value = 'fgmres
+                             1.0e-12 50
+                             newtonls basic
+                             1.0e-05 0 1.0e-12 25'
+    [../]
+    [./p]
+      vars = 'pore_pressure'
+      # petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-ksp_type
+                             -pc_type -pc_hypre_type
+                             -ksp_rtol -ksp_max_it'
+      petsc_options_value = 'fgmres
+                             hypre boomeramg
+                             1e-04 500'
+    [../]
+    [./T]
+      vars = 'temperature'
+      # petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-ksp_type
+                             -pc_type
+                             -sub_pc_type -sub_pc_factor_levels
+                             -ksp_rtol -ksp_max_it'
+      petsc_options_value = 'fgmres
+                             asm
+                             ilu 1
+                             1e-04 500'
+    [../]
+    [./e]
+      vars = 'disp_x disp_y disp_z'
+      # petsc_options = '-ksp_converged_reason'
+      petsc_options_iname = '-ksp_type
+                             -pc_type
+                             -sub_pc_type -sub_pc_factor_levels
+                             -ksp_rtol -ksp_max_it'
+      petsc_options_value = 'fgmres
+                             asm
+                             ilu 1
+                             1e-04 500'
+    [../]
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = 'NEWTON'
+  automatic_scaling = true
+  start_time = 0.0
+  end_time = 720
+  # end_time = 3.11040e+09
+  [./TimeStepper]
+    type = FunctionDT
+    function = time_step
+    min_dt = 2
+  [../]
+[]
+
+[Outputs]
+  print_linear_residuals = true
+  perf_graph = true
+
+  ## Exodus output ##
+    [./exodus]
+      type = Exodus
+      file_base = Results/Exodus/45Degrees_15L/Journal
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+
+  ## Point Value ##
+    [./source_in_out]
+      type = CSV
+      file_base = Results/Point_value/45Degrees_15L/source_in_out
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+
+  ## line_Sampler
+    [./CSV_line_sample_Z_middle]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_Z_middle
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_Z_injection]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_Z_injection
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_Z_produciton]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_Z_produciton
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_X_2000m]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_X_2000m
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_X_8000m]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_X_8000m
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_Y_2000m]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_Y_2000m
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+    [./CSV_line_sample_Y_8000m]
+      type = CSV
+      file_base = Results/Line_sample/45Degrees_15L/CSV_line_sample_Y_8000m
+      sync_times = '1 12 60 120 180 240 300 360 480 600 720'
+      sync_only = true
+    [../]
+[]
